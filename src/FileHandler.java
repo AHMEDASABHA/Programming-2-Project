@@ -1,18 +1,18 @@
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class FileHandler {
 
-    // Method to read user data from a file and return a map of UserAccount objects
-    public static Map<String, UserAccount> readUserData(String filePath) {
+    public static Map<String, UserAccount> readUsersData(String filePath) {
         Map<String, UserAccount> userAccounts = new HashMap<>();
+        File file = new File(filePath);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                // Assuming each line is formatted as:
-                // accountNumber,fullName,phoneNumber,password,balance
+
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
                 String[] userData = line.split(",");
                 if (userData.length == 5) {
                     String accountNumber = userData[0];
@@ -27,39 +27,35 @@ public class FileHandler {
                     System.out.println("Invalid data format: " + line);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            System.out.println("User data file not found. Starting with an empty user database.");
         }
+
 
         return userAccounts;
     }
 
-    // Method to write user data to a file
-    public static void writeUserData(String filePath, Map<String, UserAccount> userAccounts) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+    public static void writeUsersData(String filePath, Map<String, UserAccount> userAccounts) {
+        try (PrintWriter writer = new PrintWriter(filePath)) {
             for (UserAccount user : userAccounts.values()) {
-                String userData = String.join(",",
+                writer.printf("%s,%s,%s,%s,%.2f%n",
                         user.getAccountNumber(),
                         user.getFullName(),
                         user.getPhoneNumber(),
                         user.getPassword(),
-                        String.valueOf(user.getBalance()));
-                bw.write(userData);
-                bw.newLine();
+                        user.getBalance());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            System.out.println("Error writing user data to file: " + e.getMessage());
         }
     }
 
-    // Method to append a transaction record to the transaction history file
     public static void appendTransactionHistory(String accountNumber, String transaction) {
         String filePath = "transaction_history.txt";
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true))) {
-            bw.write(accountNumber + ": " + transaction);
-            bw.newLine();
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) {
+            writer.println(accountNumber + ": " + transaction);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error appending transaction record to file: " + e.getMessage());
         }
     }
 }

@@ -9,23 +9,20 @@ public class ATMSystem {
     private static final int MAX_ACCOUNT_NUMBER = 9999999;
     private static final int MIN_ACCOUNT_NUMBER = 1000000;
 
-    // Constructor
     public ATMSystem() {
-        userAccounts = FileHandler.readUserData(USER_DATA_FILE);
+        userAccounts = FileHandler.readUsersData(USER_DATA_FILE);
     }
 
-    // Method to generate a unique 7-digit account number
     private String generateUniqueAccountNumber() {
         Random random = new Random();
         String accountNumber;
         do {
-            int number = random.nextInt((MAX_ACCOUNT_NUMBER - MIN_ACCOUNT_NUMBER) + 1) + MIN_ACCOUNT_NUMBER;
-            accountNumber = String.valueOf(number);
+            // From the internet as a way to generate random number of 7 digits
+            accountNumber = String.format("%07d", random.nextInt(10000000));
         } while (userAccounts.containsKey(accountNumber));
         return accountNumber;
     }
 
-    // Method to create a new user account
     public void createNewAccount(Scanner scanner) {
         System.out.println("Enter Full Name:");
         String fullName = scanner.nextLine();
@@ -35,17 +32,16 @@ public class ATMSystem {
         String password = scanner.nextLine();
         System.out.println("Enter Initial Balance (default is 0):");
         double initialBalance = scanner.nextDouble();
-        scanner.nextLine(); // Consume newline
+        scanner.nextLine();
 
         String accountNumber = generateUniqueAccountNumber();
         UserAccount newUser = new UserAccount(accountNumber, fullName, phoneNumber, password, initialBalance);
         userAccounts.put(accountNumber, newUser);
-        FileHandler.writeUserData(USER_DATA_FILE, userAccounts);
+        FileHandler.writeUsersData(USER_DATA_FILE, userAccounts);
 
-        System.out.println("Account created successfully! Your account number is: " + accountNumber);
+        System.out.println("Account created successfully! Your account number is: " + accountNumber + ", Be sure to save it..");
     }
 
-    // Method to handle user login
     public UserAccount login(Scanner scanner) {
         System.out.println("Enter Account Number:");
         String accountNumber = scanner.nextLine();
@@ -62,7 +58,6 @@ public class ATMSystem {
         }
     }
 
-    // Method to display the main menu and handle user interactions
     public void mainMenu() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -113,14 +108,14 @@ public class ATMSystem {
                     double depositAmount = scanner.nextDouble();
                     scanner.nextLine(); // Consume newline
                     user.deposit(depositAmount);
-                    FileHandler.writeUserData(USER_DATA_FILE, userAccounts);
+                    FileHandler.writeUsersData(USER_DATA_FILE, userAccounts);
                     break;
                 case 2:
                     System.out.println("Enter amount to withdraw:");
                     double withdrawAmount = scanner.nextDouble();
                     scanner.nextLine(); // Consume newline
                     user.withdraw(withdrawAmount);
-                    FileHandler.writeUserData(USER_DATA_FILE, userAccounts);
+                    FileHandler.writeUsersData(USER_DATA_FILE, userAccounts);
                     break;
                 case 3:
                     System.out.println("Current Balance: " + user.checkBalance());
