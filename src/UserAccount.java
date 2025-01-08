@@ -3,13 +3,14 @@ import java.util.List;
 
 public class UserAccount {
     private final String accountNumber;
-    private String fullName;
-    private String phoneNumber;
+    private final String fullName;
+    private final String phoneNumber;
     private String password;
     private double balance;
     private final List<String> transactionHistory;
+    private int failedLoginAttempts;
+    private boolean accountLocked;
 
-    // Constructor
     public UserAccount(String accountNumber, String fullName, String phoneNumber, String password, double balance) {
         this.accountNumber = accountNumber;
         this.fullName = fullName;
@@ -17,9 +18,10 @@ public class UserAccount {
         this.password = password;
         this.balance = balance;
         this.transactionHistory = new ArrayList<>();
+        this.failedLoginAttempts = 0;
+        this.accountLocked = false;
     }
 
-    // Deposit method
     public void deposit(double amount) {
         if (amount > 0) {
             balance += amount;
@@ -31,7 +33,6 @@ public class UserAccount {
         }
     }
 
-    // Withdraw method
     public void withdraw(double amount) {
         if (amount > 0 && amount <= balance) {
             balance -= amount;
@@ -43,12 +44,10 @@ public class UserAccount {
         }
     }
 
-    // Check balance method
     public double checkBalance() {
         return balance;
     }
 
-    // View transaction history method
     public void viewTransactionHistory() {
         for (String transaction : transactionHistory) {
             System.out.println(transaction);
@@ -57,6 +56,10 @@ public class UserAccount {
 
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getPhoneNumber() {
@@ -74,5 +77,21 @@ public class UserAccount {
 
     public double getBalance() {
         return balance;
+    }
+
+    public int getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    public void setFailedLoginAttempts(int failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public boolean isAccountLocked() {
+        return accountLocked;
+    }
+
+    public void setAccountLocked(boolean accountLocked) {
+        this.accountLocked = accountLocked;
     }
 }

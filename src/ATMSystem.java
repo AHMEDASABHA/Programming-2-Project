@@ -4,10 +4,7 @@ import java.util.Scanner;
 
 public class ATMSystem {
     private final Map<String, UserAccount> userAccounts;
-    private static final String USER_DATA_FILE = "/Users/ahmedsabha/MyLife/University/Java Labs/Final Project/user_data.txt";
-    private static final int ACCOUNT_NUMBER_LENGTH = 7;
-    private static final int MAX_ACCOUNT_NUMBER = 9999999;
-    private static final int MIN_ACCOUNT_NUMBER = 1000000;
+    private static final String USER_DATA_FILE = "user_data.txt";
 
     public ATMSystem() {
         userAccounts = FileHandler.readUsersData(USER_DATA_FILE);
@@ -45,17 +42,61 @@ public class ATMSystem {
     public UserAccount login(Scanner scanner) {
         System.out.println("Enter Account Number:");
         String accountNumber = scanner.nextLine();
+        UserAccount user = userAccounts.get(accountNumber);
+        if (user == null) {
+            System.out.println("Account not found!");
+            return null;
+        }
         System.out.println("Enter Password:");
         String password = scanner.nextLine();
 
-        UserAccount user = userAccounts.get(accountNumber);
-        if (user != null && user.getPassword().equals(password)) {
-            System.out.println("Login successful!");
-            return user;
-        } else {
-            System.out.println("Invalid account number or password.");
+
+        if (user.isAccountLocked()) {
+            System.out.println("Account is locked due to multiple failed login attempts");
             return null;
         }
+        if (user.getPassword().equals(password)) {
+            System.out.println("Login successful!");
+            user.setFailedLoginAttempts(0);
+            user.setAccountLocked(false);
+            return user;
+        } else {
+            int attempts = user.getFailedLoginAttempts() + 1;
+            user.setFailedLoginAttempts(attempts);
+            System.out.println("Incorrect password attempt  " + attempts + " of 3");
+            if (attempts >= 3) {
+                user.setAccountLocked(true);
+                System.out.println("Account is locked due to multiple failed login attempts");
+            }
+            return null;
+        }
+    }
+
+    public void changePassword(Scanner scanner) {
+        System.out.println("Enter Account Number:");
+        String accountNumber = scanner.nextLine();
+
+        UserAccount user = userAccounts.get(accountNumber);
+        if (user == null) {
+            System.out.println("Account not found!");
+            return;
+        }
+        if (user.isAccountLocked()) {
+            System.out.println("Account is locked due to multiple failed login attempts");
+            return;
+        }
+        System.out.println("Enter your old Password:");
+        String password = scanner.nextLine();
+        System.out.println("Enter your new Password:");
+        String newPassword = scanner.nextLine();
+        if (user.getPassword().equals(password)) {
+            user.setPassword(newPassword);
+            FileHandler.writeUsersData(USER_DATA_FILE, userAccounts);
+            System.out.println("Password changed successfully!");
+        } else {
+            System.out.println("Current password is incorrect. Please try again.");
+        }
+        return;
     }
 
     public void mainMenu() {
@@ -63,8 +104,9 @@ public class ATMSystem {
         while (true) {
             System.out.println("\nATM System Main Menu:");
             System.out.println("1. Login");
-            System.out.println("2. Create New Account");
-            System.out.println("3. Exit");
+            System.out.println("2. Change Password");
+            System.out.println("3. Create New Account");
+            System.out.println("4. Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
@@ -77,9 +119,12 @@ public class ATMSystem {
                     }
                     break;
                 case 2:
-                    createNewAccount(scanner);
+                    changePassword(scanner);
                     break;
                 case 3:
+                    createNewAccount(scanner);
+                    break;
+                case 4:
                     System.out.println("Thank you for using the ATM System. Goodbye!");
                     scanner.close();
                     return;
